@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "budget-management"
+version = "0.1.0"
+description = ""
+authors = ["kyeon06 <jkyeon06@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.7"
+djangorestframework = "^3.14.0"
+drf-yasg = "^1.21.7"
+django-redis = "^5.4.0"
+django-environ = "^0.11.2"
+djangorestframework-simplejwt = "^5.3.0"
+psycopg2 = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
