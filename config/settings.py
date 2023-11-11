@@ -25,8 +25,8 @@ THIRD_PARTY_APPS = [
 ]
 
 CUSTOM_APPS = [
-    'common.CommonConfig',
-    'users.UsersConfig',
+    'common.apps.CommonConfig',
+    'users.apps.UsersConfig',
 ]
 
 SYSTEM_APPS  = [
