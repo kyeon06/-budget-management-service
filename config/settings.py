@@ -20,12 +20,13 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 THIRD_PARTY_APPS = [
-    "rest_framework",
-    "drf_yasg",
+    'rest_framework',
+    'drf_yasg',
 ]
 
 CUSTOM_APPS = [
-
+    'common.CommonConfig',
+    'users.UsersConfig',
 ]
 
 SYSTEM_APPS  = [
@@ -122,7 +123,7 @@ MEDIA_URL = '/media/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "users.User"
 
 # Django Rest Framework
 REST_FRAMEWORK = {
