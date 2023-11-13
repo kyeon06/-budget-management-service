@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 import environ
 from pathlib import Path
@@ -22,6 +23,8 @@ ALLOWED_HOSTS = ["*"]
 THIRD_PARTY_APPS = [
     'rest_framework',
     'drf_yasg',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 CUSTOM_APPS = [
@@ -136,4 +139,14 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+}
+
+
+# Simple JWT
+REST_USE_JWT = True
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "UPDATE_LAST_LOGIN": True,
 }

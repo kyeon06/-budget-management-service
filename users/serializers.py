@@ -25,3 +25,13 @@ class SignupSerializer(serializers.ModelSerializer):
 class SignupOutputSerializer(serializers.Serializer):
     username = serializers.CharField()
     message = serializers.CharField()
+
+
+class LoginSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'password'
+        ]
