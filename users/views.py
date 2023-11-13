@@ -1,10 +1,14 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth import authenticate
 
-from users.serializers import SignupOutputSerializer, SignupSerializer
+from users.serializers import LoginSerializer, SignupOutputSerializer, SignupSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 
 # api/v1/users/signup/
@@ -33,4 +37,55 @@ class SignupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# api/v1/users/login/
+class LoginView(APIView):
+    permission_classes = [AllowAny]
     
+    @swagger_auto_schema(
+        request_body=LoginSerializer
+    )
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        if (not username) or (not password):
+            raise ValueError("username, password를 입력해주세요.")
+        
+        user = authenticate(username=username, password=password)
+
+        if user:
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+
+            data = {
+                "message" : "로그인 완료",
+                "username" : user.get_username(),
+                "token" : {
+                    "refresh_token" : refresh_token,
+                    "access_token" : access_token,
+                }
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+        
+        return Response({"message":"로그인 실패, 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
+
+
+# api/v1/users/logout/
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        request_body=None
+    )
+    def post(self, request):
+
+        try:
+            refresh_token = request.auth
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message" : "로그아웃!"}, status=status.HTTP_200_OK)
+        
+        except TokenError:
+            return Response({"message" : "유효하지 않은 토큰입니다."}, status=status.HTTP_400_BAD_REQUEST)
