@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
 from common.models import BaseModel
 
@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         return self.create_user(username, password, **extra_fields)
 
 
-class User(AbstractBaseUser, BaseModel):
+class User(AbstractBaseUser, BaseModel, PermissionsMixin):
     username = models.CharField("계정명", max_length=20, unique=True)
 
     is_active = models.BooleanField("활성화여부", default=True)
