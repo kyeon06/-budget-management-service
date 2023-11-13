@@ -20,12 +20,13 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 THIRD_PARTY_APPS = [
-    "rest_framework",
-    "drf_yasg",
+    'rest_framework',
+    'drf_yasg',
 ]
 
 CUSTOM_APPS = [
-
+    'common.apps.CommonConfig',
+    'users.apps.UsersConfig',
 ]
 
 SYSTEM_APPS  = [
@@ -72,15 +73,21 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": env("DB_NAME"),
+#         "USER": env("DB_USER"),
+#         "PASSWORD": env("DB_PASSWORD"),
+#         "HOST": env("DB_HOST"),
+#         "PORT": env("DB_PORT"),
+#     }
+# }
 
 
 # Password validation
@@ -109,7 +116,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-# USE_TZ = True
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,7 +129,7 @@ MEDIA_URL = '/media/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "users.User"
 
 # Django Rest Framework
 REST_FRAMEWORK = {
