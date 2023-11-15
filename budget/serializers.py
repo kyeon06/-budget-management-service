@@ -8,6 +8,7 @@ class BudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
         fields = [
+            'id',
             'user',
             'category',
             'money',
@@ -23,6 +24,7 @@ class BudgetListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
         fields = [
+            'id',
             'user',
             'category',
             'money',
@@ -44,6 +46,7 @@ class BudgetDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
         fields = [
+            'id',
             'category',
             'money',
             'start_date',
@@ -51,6 +54,7 @@ class BudgetDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+
 
 class BudgetUpdateSerializer(serializers.Serializer):
     category = serializers.CharField()
