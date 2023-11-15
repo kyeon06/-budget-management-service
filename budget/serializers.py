@@ -36,3 +36,24 @@ class BudgetCreateSerializer(serializers.Serializer):
     money = serializers.IntegerField()
     start_date = serializers.DateField()
     end_date = serializers.DateField()
+
+
+class BudgetDetailSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField()
+    
+    class Meta:
+        model = Budget
+        fields = [
+            'category',
+            'money',
+            'start_date',
+            'end_date',
+            'created_at',
+            'updated_at'
+        ]
+
+class BudgetUpdateSerializer(serializers.Serializer):
+    category = serializers.CharField()
+    money = serializers.IntegerField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
