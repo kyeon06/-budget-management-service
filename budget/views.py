@@ -96,8 +96,19 @@ class BudgetDetailAPIView(APIView):
             return Response(BudgetDetailSerializer(updated_budget).data, status=status.HTTP_200_OK)
 
         return Response({"message" : "예산 수정을 실패했습니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
 
+    def delete(self, request, budget_id):
+        user = request.user
+
+        try:
+            budget = Budget.objects.get(id=budget_id, user=user)
+        except Exception as e:
+            return Response({"error_message" : str(e), "message" : "해당 예산 정보를 삭제할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        budget.delete()
+
+        return Response({"message" : "예산 정보가 삭제되었습니다."}, status=status.HTTP_200_OK)
 
 
 
