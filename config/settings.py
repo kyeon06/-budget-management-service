@@ -31,6 +31,7 @@ CUSTOM_APPS = [
     'common.apps.CommonConfig',
     'users.apps.UsersConfig',
     'categories.apps.CategoriesConfig',
+    'budget.apps.BudgetConfig',
 ]
 
 SYSTEM_APPS  = [
@@ -150,4 +151,19 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "UPDATE_LAST_LOGIN": True,
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'BearerAuth': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': "JWT Token"
+        }
+    },
+    'SECURITY_REQUIREMENTS': [{
+        'BearerAuth': []
+    }]
 }
