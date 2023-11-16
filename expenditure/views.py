@@ -141,3 +141,25 @@ class ExpenditureDetailAPIView(APIView):
             return Response(ExpenditureDetailSerializer(updated_data).data, status=status.HTTP_200_OK)
         
         return Response({"message" : "내역 수정에 실패하였습니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    @swagger_auto_schema(
+            request_body=None
+    )
+    def delete(self, request, expenditure_id):
+        user = request.user
+
+        try:
+            data = Expenditure.objects.get(user=user, id=expenditure_id)
+        except Exception as e :
+            return Response(
+                {
+                    "error_code" : str(e),
+                    "message" : "해당 내역을 찾을 수 없습니다."
+                },
+                status=status.HTTP_404_NOT_FOUND
+                )
+        
+        data.delete()
+
+        return Response({"message" : "삭제 완료!"}, status=status.HTTP_200_OK)
