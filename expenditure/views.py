@@ -59,10 +59,16 @@ class ExpenditureAPIView(APIView):
         
         try:
             category = Category.objects.get(name=input_category)
-            expense_data['category'] = category.id
         except Exception as e:
-            raise ValueError("해당 카테고리는 사용할 수 없습니다. 다시 입력해주세요.")
+            return Response(
+                {
+                    "error_code" : str(e),
+                    "message" : "해당 내역을 찾을 수 없습니다."
+                },
+                status= status.HTTP_404_NOT_FOUND
+                )
         
+        expense_data['category'] = category.id
         expense_data['user'] = user.id
 
         serializer = ExpenditureSerializer(data=expense_data)
@@ -78,4 +84,28 @@ class ExpenditureDetailAPIView(APIView):
     """
     지출 내역을 상세 조회하고, 수정, 삭제하는 기능 관련 API
     """
-    pass
+    permission_classes = [IsAuthenticated]
+
+
+    @swagger_auto_schema(
+            request_body=None,
+            responses={
+                status.HTTP_200_OK : ExpenditureDetailSerializer
+            }
+    )
+    def get(self, request, expenditure_id):
+        user = request.user
+
+        try:
+            expense_data = Expenditure.objects.get(user=user, id=expenditure_id)
+        except Exception as e :
+            return Response(
+                {
+                    "error_code" : str(e),
+                    "message" : "해당 내역을 찾을 수 없습니다."
+                },
+                status=status.HTTP_404_NOT_FOUND
+                )
+        
+        serializer = ExpenditureDetailSerializer(expense_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
