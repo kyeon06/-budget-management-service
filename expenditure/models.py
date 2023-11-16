@@ -6,7 +6,7 @@ from users.models import User
 
 class Expenditure(BaseModel):
     money = models.PositiveIntegerField("지출금액")
-    comment = models.TextField("지출메모", max_length=100)
+    comment = models.TextField("지출메모", max_length=100, null=True, blank=True)
     is_sum = models.BooleanField("합계여부", default=True)
     expense_date = models.DateField("지출일")
 
