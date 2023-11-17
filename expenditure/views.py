@@ -1,10 +1,14 @@
+from django.db.models import Q, Sum, F
+
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
-from categories.models import Category
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+from categories.models import Category
 from expenditure.models import Expenditure
 from expenditure.serializers import ExpenditureCreateSerializer, ExpenditureDetailSerializer, ExpenditureListSerializer, ExpenditureSerializer
 
@@ -16,20 +20,83 @@ class ExpenditureAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-
+    query_start_date = openapi.Parameter(
+        "start_date",
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="기간(시작)"
+    )
+    query_end_date = openapi.Parameter(
+        "end_date",
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="기간(끝)"
+    )
+    query_category = openapi.Parameter(
+        "category", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="검색 카테고리"
+    )
+    query_min_m = openapi.Parameter(
+        "min_m", openapi.IN_QUERY, type=openapi.TYPE_NUMBER, description="검색 최소금액"
+    )
+    query_max_m = openapi.Parameter(
+        "max_m", openapi.IN_QUERY, type=openapi.TYPE_NUMBER, description="검색 최대금액"
+    )
     @swagger_auto_schema(
-            request_body=None,
-            responses={
-                status.HTTP_200_OK : ExpenditureListSerializer,
-            }
+        request_body=None,
+        responses={
+            status.HTTP_200_OK : ExpenditureListSerializer,
+        },
+        operation_id="지출 목록 조회",
+        operation_description="검색/정렬 기준에 대한 지출 목록을 조회합니다.",
+        manual_parameters=[
+            query_start_date,
+            query_end_date,
+            query_category,
+            query_min_m,
+            query_max_m
+        ]
     )
     def get(self, request):
+        query = Q()
+        
         user = request.user
+        start_date = request.query_params.get('start_date', "2023-11-01")
+        end_date = request.query_params.get('end_date', "2023-11-30")
+        
+        if start_date is None or end_date is None:
+            return Response({"message" : "조회 기간을 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        category_name = request.query_params.get('category', None)
+        min_m = request.query_params.get('min_m', None)
+        max_m = request.query_params.get('max_m', None)
 
-        user_expenditure = Expenditure.objects.filter(user=user)
+        if category_name is not None:
+            try:
+                category_instance = Category.objects.get(name=category_name)
+                query &= Q(category=category_instance)
+            except:
+                return Response({"message" : "해당 카테고리의 정보가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+        
+        if min_m is not None and max_m is not None:
+            query &= Q(money__range=[min_m, max_m])
+        
+        query &= Q(user=user)
+        query &= Q(expense_date__range=[start_date, end_date])
+        query &= Q(is_sum=True)
+
+        user_expenditure = Expenditure.objects.filter(query)
         if user_expenditure.exists():
+            total_sum = user_expenditure.aggregate(Sum('money')).values()
+            sum_category_group = user_expenditure.values('category').annotate(Sum('money')).order_by('category')
             serializer = ExpenditureListSerializer(user_expenditure, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+            result = {
+                "expense_list" : serializer.data,
+                "sum_category" : sum_category_group,
+                "total_sum" : total_sum
+            }
+
+            return Response(result, status=status.HTTP_200_OK)
         
         return Response({"message" : "지출 내역이 존재하지 않습니다. 지출을 등록해주세요."}, status=status.HTTP_404_NOT_FOUND)
     
