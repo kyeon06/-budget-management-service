@@ -32,6 +32,7 @@ CUSTOM_APPS = [
     'users.apps.UsersConfig',
     'categories.apps.CategoriesConfig',
     'budget.apps.BudgetConfig',
+    'expenditure.apps.ExpenditureConfig',
 ]
 
 SYSTEM_APPS  = [
