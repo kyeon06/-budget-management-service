@@ -33,10 +33,6 @@ class BudgetListSerializer(serializers.ModelSerializer):
         ]
 
 
-class BudgetCreateSerializer(serializers.Serializer):
-    start_date = serializers.DateField()
-    end_date = serializers.DateField()
-    budget_data = serializers.DictField()
 
 
 class BudgetDetailSerializer(serializers.ModelSerializer):
@@ -55,8 +51,14 @@ class BudgetDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class BudgetCreateSerializer(serializers.Serializer):
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    budget_data = serializers.DictField()
+
+
 class BudgetUpdateSerializer(serializers.Serializer):
-    category = serializers.CharField()
+    category = serializers.IntegerField()
     money = serializers.IntegerField()
     start_date = serializers.DateField()
     end_date = serializers.DateField()
