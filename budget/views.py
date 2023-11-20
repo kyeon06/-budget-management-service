@@ -38,25 +38,35 @@ class BudgetAPIView(APIView):
         예산 생성
         """
         user = request.user
-        budget_data = request.data
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
 
-        required_field = (not budget_data['money']) or (not budget_data['start_date']) or (not budget_data['end_date'])
-        if required_field:
-            raise ValueError("예산 기간과 금액을 입력해주세요.")
+        if start_date is None or end_date is None:
+            return Response({"message" : "기간을 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         
-        category = budget_data['category']
-        if category:
-            budget_data['category'] = Category.objects.get(name=category).id
-        
-        budget_data["user"] = user.id
+        result = []
+        input_data = {
+            "user" : user.id,
+            "start_date" : start_date,
+            "end_date" : end_date
+        }
+        budget_data = request.data.get('budget_data')
+        for category, money in budget_data.items():
+            try:
+                category_id = Category.objects.get(name=category).id
+            except:
+                return Response({"message" : f"{category} : 해당 카테고리는 사용할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = BudgetSerializer(data=budget_data)
+            input_data['category'] = category_id
+            input_data['money'] = money
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = BudgetSerializer(data=input_data)
+            serializer.is_valid(raise_exception=True)
+            saved_data = serializer.save()
+            output_data = BudgetDetailSerializer(saved_data).data
+            result.append(output_data)
+
+        return Response(result, status=status.HTTP_201_CREATED)
         
 
 # api/v1/budget/<int:budget_id>/
