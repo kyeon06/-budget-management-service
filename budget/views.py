@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from budget.models import Budget
 from budget.serializers import BudgetCreateSerializer, BudgetDetailSerializer, BudgetListSerializer, BudgetSerializer, BudgetUpdateSerializer
@@ -13,14 +14,29 @@ from categories.models import Category
 class BudgetAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-
+    query_month = openapi.Parameter(
+        "month", openapi.IN_QUERY, type=openapi.TYPE_NUMBER, description="검색 월"
+    )
+    @swagger_auto_schema(
+        request_body=None,
+        manual_parameters=[
+            query_month
+        ],
+        responses={
+            status.HTTP_200_OK : BudgetListSerializer
+        }
+    )
     def get(self, request):
         """
         예산 목록
         """
         user = request.user
+        month = request.query_params.get('month', None)
 
-        budget_list = Budget.objects.filter(user=user)
+        if month is None:
+            budget_list = Budget.objects.filter(user=user)
+        else:
+            budget_list = Budget.objects.filter(user=user, start_date__month=month)
         
         serializer = BudgetListSerializer(budget_list, many=True)
 
