@@ -1,3 +1,4 @@
+from django.db.models import Q, Sum, Count
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,9 +7,10 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from budget.models import Budget
-from budget.serializers import BudgetCreateSerializer, BudgetDetailSerializer, BudgetListSerializer, BudgetSerializer, BudgetUpdateSerializer
+from budget.serializers import BudgetCreateSerializer, BudgetDetailSerializer, BudgetListSerializer, BudgetRecommendInputSerializer, BudgetRecommendOutputSerializer, BudgetSerializer, BudgetUpdateSerializer
 from categories.models import Category
 
+import math
 
 # api/v1/budget/
 class BudgetAPIView(APIView):
@@ -136,6 +138,42 @@ class BudgetDetailAPIView(APIView):
 
         return Response({"message" : "예산 정보가 삭제되었습니다."}, status=status.HTTP_200_OK)
 
+
+# api/v1/budget/recommend/
+class BudgetRecommendAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body = BudgetRecommendInputSerializer,
+        responses={
+            status.HTTP_200_OK : BudgetRecommendOutputSerializer
+        }
+    )
+    def post(self, request):
+        user = request.user
+        
+        budget = request.data.get('budget', None)
+        if budget is None:
+            return Response({"message" : "총 예산을 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 통계치 계산
+        all_budget = Budget.objects.all()
+        all_category = Category.objects.all().values_list('name', flat=True)
+
+        sum_category_budget = all_budget.values('category__name').annotate(Sum('money')).order_by('category')
+        sum_budget = all_budget.aggregate(Sum('money'))
+
+        avg_list = { k : 0 for k in all_category }
+        for category_budget in sum_category_budget:
+            avg_list[category_budget['category__name']] = round(category_budget['money__sum'] / sum_budget['money__sum'], 2)
+
+        budget_data = { k : v * budget for k, v in avg_list.items()}
+
+        data = {
+            "budget_data" : budget_data
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 
