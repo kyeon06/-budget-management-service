@@ -33,8 +33,6 @@ class BudgetListSerializer(serializers.ModelSerializer):
         ]
 
 
-
-
 class BudgetDetailSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     
@@ -62,3 +60,11 @@ class BudgetUpdateSerializer(serializers.Serializer):
     money = serializers.IntegerField()
     start_date = serializers.DateField()
     end_date = serializers.DateField()
+
+
+class BudgetRecommendInputSerializer(serializers.Serializer):
+    budget = serializers.IntegerField()
+
+
+class BudgetRecommendOutputSerializer(serializers.Serializer):
+    budget_data = serializers.DictField()
